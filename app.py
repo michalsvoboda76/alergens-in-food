@@ -26,7 +26,8 @@ def check_ean():
     error_details = None
     metanutrition = None
     if request.method == 'POST':
-        ean = request.form['ean']
+        ean = request.form['ean'].strip()
+        
         restrictions = session.get('restrictions', [])
         # Try go-upc.com API first
         api_url_go_upc = f'https://go-upc.com/api/v1/code/{ean}'
@@ -94,7 +95,9 @@ def check_ean():
             resp = requests.get(api_url_openupc, timeout=5, headers=headers)
             if resp.status_code == 200:
                 data = resp.json()
-                product_name = data.get('title', 'Unknown product')
+                product_name = data.get('title', '').strip()
+                if not product_name:
+                    product_name = 'Unknown product'
                 # OpenUPC does not provide ingredients in free tier
                 result = f"{product_name}"
                 # Extract metanutrition if present
