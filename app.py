@@ -96,7 +96,7 @@ def check_ean():
                 data = resp.json()
                 product_name = data.get('title', 'Unknown product')
                 # OpenUPC does not provide ingredients in free tier
-                result = f"{product_name}: No ingredient info available."
+                result = f"{product_name}"
                 # Extract metanutrition if present
                 if 'metanutrition' in data:
                     try:
@@ -105,6 +105,8 @@ def check_ean():
                         metanutrition = ast.literal_eval(data['metanutrition']) if isinstance(data['metanutrition'], str) else data['metanutrition']
                     except Exception:
                         metanutrition = data['metanutrition']
+                else:
+                    result = f"{product_name}: No nutrition info available."
                 return render_template('check_ean.html', result=result, error_details=error_details, metanutrition=metanutrition)
             else:
                 print(f"OpenUPC API error: status={resp.status_code}, response={resp.text}")
