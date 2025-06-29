@@ -23,6 +23,7 @@ def set_restrictions():
 def check_ean():
     result = None
     product_name = None
+    error_details = None
     if request.method == 'POST':
         ean = request.form['ean']
         restrictions = session.get('restrictions', [])
@@ -36,23 +37,23 @@ def check_ean():
         api_url_openupc = f'https://api.upcdatabase.org/product/{ean}'
         try:
             # 1. Try go-upc.com
-            resp = requests.get(api_url_go_upc, timeout=5)
-            if resp.status_code == 200:
-                data = resp.json()
-                product = data.get('product', {})
-                product_name = product.get('name', 'Unknown product')
-                ingredients = product.get('ingredients', '')
-                if ingredients:
-                    ingredients_list = [i.strip().lower() for i in ingredients.split(',')]
-                    if any(r.lower() in ingredients_list for r in restrictions):
-                        result = f"{product_name} is NOT suitable for you."
-                    else:
-                        result = f"{product_name} is OK for you."
-                else:
-                    result = f"{product_name}: No ingredient info available."
-                return render_template('check_ean.html', result=result)
-            else:
-                print(f"go-upc.com API error: status={resp.status_code}, response={resp.text}")
+            # resp = requests.get(api_url_go_upc, timeout=5)
+            # if resp.status_code == 200:
+            #     data = resp.json()
+            #     product = data.get('product', {})
+            #     product_name = product.get('name', 'Unknown product')
+            #     ingredients = product.get('ingredients', '')
+            #     if ingredients:
+            #         ingredients_list = [i.strip().lower() for i in ingredients.split(',')]
+            #         if any(r.lower() in ingredients_list for r in restrictions):
+            #             result = f"{product_name} is NOT suitable for you."
+            #         else:
+            #             result = f"{product_name} is OK for you."
+            #     else:
+            #         result = f"{product_name}: No ingredient info available."
+            #     return render_template('check_ean.html', result=result)
+            # else:
+            #     print(f"go-upc.com API error: status={resp.status_code}, response={resp.text}")
             # 2. Try Open Food Facts
             # resp = requests.get(api_url_off, timeout=5)
             # if resp.status_code == 200:
@@ -83,23 +84,24 @@ def check_ean():
                     result = f"{product_name}: No ingredient info available."
                 else:
                     result = 'Product not found in Open Product Data.'
-                return render_template('check_ean.html', result=result)
+                return render_template('check_ean.html', result=result, error_details=error_details)
             else:
-                print(f"Open Product Data API error: status={resp.status_code}, response={resp.text}")
+                error_details = resp.text
+                print(f"Open Product Data API error: status={resp.status_code}, response={resp.text[:100]}...")
             # 4. Try OpenUPC
-            resp = requests.get(api_url_openupc, timeout=5)
-            if resp.status_code == 200:
-                data = resp.json()
-                product_name = data.get('title', 'Unknown product')
-                # OpenUPC does not provide ingredients in free tier
-                result = f"{product_name}: No ingredient info available."
-                return render_template('check_ean.html', result=result)
-            else:
-                print(f"OpenUPC API error: status={resp.status_code}, response={resp.text}")
-                result = 'Product not found.'
+            # resp = requests.get(api_url_openupc, timeout=5)
+            # if resp.status_code == 200:
+            #     data = resp.json()
+            #     product_name = data.get('title', 'Unknown product')
+            #     # OpenUPC does not provide ingredients in free tier
+            #     result = f"{product_name}: No ingredient info available."
+            #     return render_template('check_ean.html', result=result)
+            # else:
+            #     print(f"OpenUPC API error: status={resp.status_code}, response={resp.text}")
+            #     result = 'Product not found.'
         except Exception as e:
             result = f'Error contacting product APIs: {e}'
-    return render_template('check_ean.html', result=result)
+    return render_template('check_ean.html', result=result, error_details=error_details)
 
 if __name__ == '__main__':
     app.run(debug=True)

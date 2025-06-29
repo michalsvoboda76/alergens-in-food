@@ -13,6 +13,12 @@
     {% if result %}
         <p><strong>{{ result }}</strong></p>
     {% endif %}
+    {% if error_details %}
+        <div style="margin-top:2em; padding:1em; border:1px solid #c00; background:#fee;">
+            <h4>API Error Details:</h4>
+            <div style="overflow:auto; max-height:300px; font-size:small;">{{ error_details|safe }}</div>
+        </div>
+    {% endif %}
     <a href="/">Back to Home</a>
 </body>
 </html>
