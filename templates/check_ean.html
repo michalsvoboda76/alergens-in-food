@@ -3,13 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>Check Food by EAN</title>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        #reader { width: 300px; margin: 1em 0; }
+    </style>
 </head>
 <body>
     <h2>Check Food by EAN</h2>
-    <form method="post">
-        <label>EAN Code: <input type="text" name="ean" required></label>
+    <form method="post" id="ean-form">
+        <label>EAN Code: <input type="text" name="ean" id="ean-input" required></label>
         <button type="submit">Check</button>
     </form>
+    <button onclick="startScanner()">Scan Barcode with Camera</button>
+    <div id="reader" style="display:none;"></div>
+    <script>
+        function startScanner() {
+            document.getElementById('reader').style.display = 'block';
+            const html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                (decodedText, decodedResult) => {
+                    document.getElementById('ean-input').value = decodedText;
+                    html5QrCode.stop();
+                    document.getElementById('reader').style.display = 'none';
+                },
+                (errorMessage) => {
+                    // ignore errors
+                }
+            ).catch(err => {
+                alert('Camera error: ' + err);
+            });
+        }
+    </script>
     {% if result %}
         <p><strong>{{ result }}</strong></p>
     {% endif %}
