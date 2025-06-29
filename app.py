@@ -46,6 +46,7 @@ def check_ean():
                 else:
                     result = f"{product_name}: No ingredient info available."
             else:
+                print(f"API error: status={resp.status_code}, response={resp.text}")
                 result = 'Product not found.'
         except Exception as e:
             result = f'Error contacting product API: {e}'
