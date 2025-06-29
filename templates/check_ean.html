@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Check Food by EAN</title>
+</head>
+<body>
+    <h2>Check Food by EAN</h2>
+    <form method="post">
+        <label>EAN Code: <input type="text" name="ean" required></label>
+        <button type="submit">Check</button>
+    </form>
+    {% if result %}
+        <p><strong>{{ result }}</strong></p>
+    {% endif %}
+    <a href="/">Back to Home</a>
+</body>
+</html>
