@@ -24,6 +24,7 @@ def check_ean():
     result = None
     product_name = None
     error_details = None
+    metanutrition = None
     if request.method == 'POST':
         ean = request.form['ean']
         restrictions = session.get('restrictions', [])
@@ -73,35 +74,44 @@ def check_ean():
             # else:
             #     print(f"Open Food Facts API error: status={resp.status_code}, response={resp.text}")
             # 3. Try Open Product Data (POD)
-            resp = requests.get(api_url_pod, timeout=5)
-            if resp.status_code == 200:
-                data = resp.json()
-                records = data.get('records', [])
-                if records:
-                    product = records[0]['fields']
-                    product_name = product.get('product_name', product.get('name', 'Unknown product'))
-                    # POD may not have ingredients, so just show product name
-                    result = f"{product_name}: No ingredient info available."
-                else:
-                    result = 'Product not found in Open Product Data.'
-                return render_template('check_ean.html', result=result, error_details=error_details)
-            else:
-                error_details = resp.text
-                print(f"Open Product Data API error: status={resp.status_code}, response={resp.text[:100]}...")
-            # 4. Try OpenUPC
-            # resp = requests.get(api_url_openupc, timeout=5)
+            # resp = requests.get(api_url_pod, timeout=5)
             # if resp.status_code == 200:
             #     data = resp.json()
-            #     product_name = data.get('title', 'Unknown product')
-            #     # OpenUPC does not provide ingredients in free tier
-            #     result = f"{product_name}: No ingredient info available."
-            #     return render_template('check_ean.html', result=result)
+            #     records = data.get('records', [])
+            #     if records:
+            #         product = records[0]['fields']
+            #         product_name = product.get('product_name', product.get('name', 'Unknown product'))
+            #         # POD may not have ingredients, so just show product name
+            #         result = f"{product_name}: No ingredient info available."
+            #     else:
+            #         result = 'Product not found in Open Product Data.'
+            #     return render_template('check_ean.html', result=result, error_details=error_details)
             # else:
-            #     print(f"OpenUPC API error: status={resp.status_code}, response={resp.text}")
-            #     result = 'Product not found.'
+            #     error_details = resp.text
+            #     print(f"Open Product Data API error: status={resp.status_code}, response={resp.text[:100]}...")
+            # 4. Try OpenUPC
+            headers = {"Authorization": "Bearer 62934CDE5A82DD669DA5486FD65F0FE2"}
+            resp = requests.get(api_url_openupc, timeout=5, headers=headers)
+            if resp.status_code == 200:
+                data = resp.json()
+                product_name = data.get('title', 'Unknown product')
+                # OpenUPC does not provide ingredients in free tier
+                result = f"{product_name}: No ingredient info available."
+                # Extract metanutrition if present
+                if 'metanutrition' in data:
+                    try:
+                        # metanutrition may be a string representation of a dict
+                        import ast
+                        metanutrition = ast.literal_eval(data['metanutrition']) if isinstance(data['metanutrition'], str) else data['metanutrition']
+                    except Exception:
+                        metanutrition = data['metanutrition']
+                return render_template('check_ean.html', result=result, error_details=error_details, metanutrition=metanutrition)
+            else:
+                print(f"OpenUPC API error: status={resp.status_code}, response={resp.text}")
+                result = 'Product not found.'
         except Exception as e:
             result = f'Error contacting product APIs: {e}'
-    return render_template('check_ean.html', result=result, error_details=error_details)
+    return render_template('check_ean.html', result=result, error_details=error_details, metanutrition=metanutrition)
 
 if __name__ == '__main__':
     app.run(debug=True)

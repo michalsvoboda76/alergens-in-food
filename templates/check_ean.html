@@ -13,6 +13,18 @@
     {% if result %}
         <p><strong>{{ result }}</strong></p>
     {% endif %}
+    {% if metanutrition %}
+        <div style="margin-top:2em; padding:1em; border:1px solid #0a0; background:#efe;">
+            <h4>Nutrition Information (metanutrition):</h4>
+            <table style="font-size:small;">
+                <tbody>
+                {% for key, value in metanutrition.items() %}
+                    <tr><td><strong>{{ key }}</strong></td><td>{{ value }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
     {% if error_details %}
         <div style="margin-top:2em; padding:1em; border:1px solid #c00; background:#fee;">
             <h4>API Error Details:</h4>
