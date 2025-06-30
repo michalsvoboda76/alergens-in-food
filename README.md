@@ -24,5 +24,9 @@ This is a Python Flask web application that allows users to specify their food r
 - `templates/` - HTML templates
 - `.github/copilot-instructions.md` - Copilot custom instructions
 
+## Hosting
+- the application is hosted on the url "https://alergens-in-food.onrender.com/"
+- hosting provider is Render.com: https://dashboard.render.com/web/srv-d1gov3jipnbc73b1c6vg
+
 ## Notes
 - This is a demo with in-memory data. For production, use a database and secure session management.
